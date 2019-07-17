@@ -75,5 +75,16 @@ func index(w http.ResponseWriter, req *http.Request) {
 		Content: "json",
 		Secret:  "my-secret-key",
 		Ssl:     "0"}
-	client.NewUploadRequest
+	var payl pld = pld{
+		Name:   "web",
+		Config: cfg,
+		Events: make([]string, 0),
+		Active: true,
+	}
+	payl.Events = append(payl.Events, "push")
+	req, err := client.NewRequest(http.MethodPost, "/repos/karoljaksik/test-k8s", payl)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 }
