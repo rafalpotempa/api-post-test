@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
@@ -11,7 +13,7 @@ import (
 var (
 	// you need to generate personal access token at
 	// https://github.com/settings/applications#personal-access-tokens
-	personalAccessToken = "4ba7dd9d8fe34a90a292e3ee07021f122cc3ebae"
+	personalAccessToken = os.Getenv("TOKEN")
 )
 
 type TokenSource struct {
@@ -19,7 +21,7 @@ type TokenSource struct {
 }
 
 type config struct {
-	URL     string `json:"url`
+	URL     string `json:"url"`
 	Content string `json:"content_type"`
 	Secret  string `json:"secret"`
 	Ssl     string `json:"insecure_ssl"`
@@ -71,10 +73,10 @@ func index(w http.ResponseWriter, req *http.Request) {
 	oauthClient := oauth2.NewClient(oauth2.NoContext, tokenSource)
 	client := github.NewClient(oauthClient)
 	var cfg config = config{
-		URL:     "https://onet.pl",
+		URL:     "http://httpbin.org/post/webhook",
 		Content: "json",
 		Secret:  "my-secret-key",
-		Ssl:     "0"}
+		Ssl:     "1"}
 	var payl pld = pld{
 		Name:   "web",
 		Config: cfg,
@@ -82,9 +84,15 @@ func index(w http.ResponseWriter, req *http.Request) {
 		Active: true,
 	}
 	payl.Events = append(payl.Events, "push")
-	req, err := client.NewRequest(http.MethodPost, "/repos/karoljaksik/test-k8s", payl)
+	//toJson, _ := json.Marshal(payl)
+	req, err := client.NewRequest(http.MethodPost, "/repos/KarolJaksik/test-k8s/hooks", payl)
 	if err != nil {
 		log.Fatalln(err)
 	}
-
+	//var dupa string
+	resp, err := client.Do(context.TODO(), req, nil)
+	if err != nil {
+		log.Print(err)
+	}
+	log.Println(resp)
 }
